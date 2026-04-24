@@ -1,0 +1,20 @@
+# Secrets — never commit these
+.env
+.streamlit/secrets.toml
+
+# ChromaDB data — too large and machine-specific for git
+chroma_db/
+
+# Parsed exam data (optional — commit if you want pre-parsed papers in the repo)
+data/parsed_exam.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db

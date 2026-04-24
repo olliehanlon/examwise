@@ -1,0 +1,16 @@
+AI Teaching Assistant Project
+
+Tasks:
+- Create predefined list of Questions and Answer for paper. Code to split out questions into sections, questions and parts.
+
+- Split Vector Store into Questions and Answers
+
+- Prompt Engineer User into specifying exam question from predefined list 
+
+- K chunks retrieved are only associated with that question
+
+- Iterate and tweak
+
+- Redefine MVP
+
+- Build Interface
