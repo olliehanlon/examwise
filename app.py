@@ -218,7 +218,8 @@ with tab_query:
 # TAB 2 — Parse Paper
 # ════════════════════════════════════════════════════════════════════════════════
 with tab_parse:
-    st.header("Parse a New Exam Paper")
+    st.markdown("## Parse a New Exam Paper")
+    st.write("")
     st.markdown(
         "Upload a question paper PDF and (optionally) its mark scheme. "
         "The LLM will extract every question and match it to the model answer."
