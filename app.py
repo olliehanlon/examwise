@@ -54,8 +54,26 @@ st.markdown(
     <style>
     .block-container { padding-top: 1.5rem; }
     .stTabs [data-baseweb="tab-list"] { gap: 1rem; }
-    .stTabs [data-baseweb="tab"] { font-size: 1rem; padding: 0.5rem 1rem; }
+    .stTabs [data-baseweb="tab"] {
+        font-size: 1rem;
+        line-height: 1.25;
+        padding: 0.85rem 1rem 0.65rem 1rem;
+        min-height: 3rem;
+        display: flex;
+        align-items: center;
+        box-sizing: border-box;
+    }
+    .stTabs [data-baseweb="tab"] > div {
+        line-height: 1.25;
+    }
     div[data-testid="stExpander"] { border: 1px solid #e0e0e0; border-radius: 6px; }
+    .section-title {
+        margin: 0.5rem 0 0.4rem 0;
+        padding-top: 0.15rem;
+        font-size: 2rem;
+        line-height: 1.25;
+        font-weight: 700;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -75,6 +93,12 @@ def cached_list_papers():
 
 def reset_paper_cache():
     cached_list_papers.clear()
+
+
+def catalogue_counts(papers: dict[str, list[str]]) -> tuple[int, int]:
+    paper_count = len(papers)
+    question_count = sum(len(qnums) for qnums in papers.values())
+    return paper_count, question_count
 
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
@@ -111,6 +135,7 @@ tab_query, tab_parse, tab_ingest = st.tabs(["💬 Query", "📄 Parse Paper", "�
 # ════════════════════════════════════════════════════════════════════════════════
 with tab_query:
     st.header("Ask About Your Exam Papers")
+    st.caption("Find a question by number, or search across papers by topic.")
 
     papers = cached_list_papers()
 
@@ -120,8 +145,13 @@ with tab_query:
             "Use the **Parse Paper** tab to parse a PDF, "
             "then **Ingest** it to load it into the database."
         )
+        if st.button("Refresh catalogue", key="refresh_query_empty"):
+            reset_paper_cache()
+            st.rerun()
     else:
         # ── Mode toggle ─────────────────────────────────────────────────────
+        paper_count, question_count = catalogue_counts(papers)
+        st.caption(f"Indexed papers: {paper_count} | Indexed questions: {question_count}")
         mode = st.radio(
             "Search mode",
             ["By question number", "By topic (semantic search)"],
@@ -218,12 +248,12 @@ with tab_query:
 # TAB 2 — Parse Paper
 # ════════════════════════════════════════════════════════════════════════════════
 with tab_parse:
-    st.markdown("## Parse a New Exam Paper")
-    st.write("")
+    st.markdown('<div class="section-title">Parse a New Exam Paper</div>', unsafe_allow_html=True)
     st.markdown(
         "Upload a question paper PDF and (optionally) its mark scheme. "
         "The LLM will extract every question and match it to the model answer."
     )
+    st.caption("The output JSON can be reused later, so you only need to parse a paper once.")
 
     col_qp, col_ms = st.columns(2)
     with col_qp:
@@ -298,6 +328,8 @@ with tab_ingest:
         "Re-running is safe — duplicates are detected and overwritten."
     )
 
+    st.caption("This is the step that makes questions searchable in the Query tab.")
+
     ingest_input = st.text_input(
         "Parsed JSON file path",
         value="data/parsed_exam.json",
@@ -347,6 +379,8 @@ with tab_ingest:
     if not papers:
         st.info("ChromaDB is empty or not yet initialised.")
     else:
+        paper_count, question_count = catalogue_counts(papers)
+        st.caption(f"{paper_count} papers | {question_count} questions indexed")
         for pid, qnums in papers.items():
             with st.expander(f"📄 {pid}  ({len(qnums)} questions)"):
                 st.write(", ".join(qnums))
